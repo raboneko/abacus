@@ -8,44 +8,45 @@ msgstr ""
 "Project-Id-Version: com.fyralabs.Abacus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-21 22:56-0800\n"
-"PO-Revision-Date: 2023-05-27 22:09+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Dutch <https://weblate.fyralabs.com/projects/tauOS/abacus/nl/"
-">\n"
+"PO-Revision-Date: 2025-05-10 15:46+0000\n"
+"Last-Translator: Feike Donia <feikedonia@proton.me>\n"
+"Language-Team: Dutch <https://weblate.fyralabs.com/projects/tauOS/abacus/nl/>"
+"\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.16.4\n"
+"X-Generator: Weblate 5.10.4\n"
 
 #: data/com.fyralabs.Abacus.desktop.in:4
+#, fuzzy
 msgid "Abacus"
-msgstr ""
+msgstr "Telraam"
 
 #: data/com.fyralabs.Abacus.desktop.in:5
 msgid "Calculate stuff"
-msgstr ""
+msgstr "Berekeningetjes maken"
 
 #: data/com.fyralabs.Abacus.desktop.in:6
 msgid "Calculator"
-msgstr ""
+msgstr "Rekenmachine"
 
 #: data/com.fyralabs.Abacus.desktop.in:11
 msgid "calculator;"
-msgstr ""
+msgstr "rekenmachine;"
 
 #: data/ui/window.ui:6
 msgid "About Abacus"
-msgstr ""
+msgstr "Over Telraam"
 
 #: src/Scanner.vala:64
 #, c-format
 msgid "'%s' is invalid."
-msgstr ""
+msgstr "Ongeldige invoer '%s'."
 
 #. If no rule matches the character at pos, throw an error.
 #: src/Scanner.vala:131
 #, c-format
 msgid "'%s' is unknown."
-msgstr ""
+msgstr "'%s' is onbekend."
