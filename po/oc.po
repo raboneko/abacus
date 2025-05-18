@@ -1,0 +1,48 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.fyralabs.Abacus package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: com.fyralabs.Abacus\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-01-21 22:56-0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: oc\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: data/com.fyralabs.Abacus.desktop.in:4
+msgid "Abacus"
+msgstr ""
+
+#: data/com.fyralabs.Abacus.desktop.in:5
+msgid "Calculate stuff"
+msgstr ""
+
+#: data/com.fyralabs.Abacus.desktop.in:6
+msgid "Calculator"
+msgstr ""
+
+#: data/com.fyralabs.Abacus.desktop.in:11
+msgid "calculator;"
+msgstr ""
+
+#: data/ui/window.ui:6
+msgid "About Abacus"
+msgstr ""
+
+#: src/Scanner.vala:64
+#, c-format
+msgid "'%s' is invalid."
+msgstr ""
+
+#. If no rule matches the character at pos, throw an error.
+#: src/Scanner.vala:131
+#, c-format
+msgid "'%s' is unknown."
+msgstr ""
