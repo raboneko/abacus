@@ -36,11 +36,17 @@ public class Abacus.MainWindow : He.ApplicationWindow {
     [GtkChild]
     private unowned Gtk.Stack stack;
     [GtkChild]
+    private unowned Gtk.Stack titlebar_stack;
+    [GtkChild]
     private unowned Gtk.ToggleButton converter;
+    [GtkChild]
+    private unowned Gtk.ToggleButton history;
     [GtkChild]
     private unowned Gtk.MenuButton menu;
     [GtkChild]
     private unowned Gtk.Overlay about_overlay;
+    [GtkChild]
+    private unowned Gtk.ListBox history_list;
 
     [GtkChild]
     private unowned He.Button swap_button;
@@ -75,6 +81,8 @@ public class Abacus.MainWindow : He.ApplicationWindow {
     private Convertor[] convertors;
     private uint convertor_index;
 
+    private History calc_history;
+
     public const string ACTION_PREFIX = "win.";
     public const string ACTION_CLEAR = "action-clear";
     public const string ACTION_CLEAR_CONVERTER = "action-clear-converter";
@@ -106,6 +114,7 @@ public class Abacus.MainWindow : He.ApplicationWindow {
     construct {
         add_action_entries (ACTION_ENTRIES, this);
         eval = new Core.Evaluation ();
+        calc_history = new History ();
         decimal_places = 2;
 
         var application_instance = (Gtk.Application) GLib.Application.get_default ();
@@ -147,13 +156,27 @@ public class Abacus.MainWindow : He.ApplicationWindow {
 
         converter.toggled.connect (() => {
             if (converter.active) {
+                history.active = false;
                 stack.set_visible_child_name ("converter");
-                units_dropdown.visible = true;
-            } else {
+                titlebar_stack.set_visible_child_name ("converter");
+            } else if (!history.active) {
                 stack.set_visible_child_name ("calculator");
-                units_dropdown.visible = false;
+                titlebar_stack.set_visible_child_name ("default");
             }
         });
+
+        history.toggled.connect (() => {
+            if (history.active) {
+                converter.active = false;
+                stack.set_visible_child_name ("history");
+                titlebar_stack.set_visible_child_name ("history");
+            } else if (!converter.active) {
+                stack.set_visible_child_name ("calculator");
+                titlebar_stack.set_visible_child_name ("default");
+            }
+        });
+
+        calc_history.changed.connect (update_history_list);
 
         swap_button.clicked.connect (swap);
         units_dropdown.notify["selected"].connect (change_units);
@@ -204,6 +227,18 @@ public class Abacus.MainWindow : He.ApplicationWindow {
 
     private void action_insert (SimpleAction action, Variant? variant) {
         var token = variant.get_string ();
+
+        // Convert operators to their display symbols
+        var display_token = token;
+        switch (token) {
+        case "/":
+            display_token = "÷";
+            break;
+        case "*":
+            display_token = "×";
+            break;
+        }
+
         int new_position = entry.get_internal_entry ().get_position ();
         int selection_start, selection_end, selection_length;
         bool is_text_selected = entry.get_internal_entry ().get_selection_bounds (out selection_start, out selection_end);
@@ -215,9 +250,9 @@ public class Abacus.MainWindow : He.ApplicationWindow {
         }
 
         var cursor_position = entry.get_internal_entry ().cursor_position;
-        entry.get_internal_entry ().do_insert_text (token, -1, ref cursor_position);
+        entry.get_internal_entry ().do_insert_text (display_token, -1, ref cursor_position);
 
-        new_position += token.char_count ();
+        new_position += display_token.char_count ();
         entry.get_internal_entry ().set_position (new_position);
     }
 
@@ -244,9 +279,11 @@ public class Abacus.MainWindow : He.ApplicationWindow {
         position = entry.get_internal_entry ().get_position ();
         if (entry.get_internal_entry ().get_text () != "") {
             try {
-                var output = eval.evaluate (entry.get_internal_entry ().get_text (), decimal_places);
-                result.label = entry.get_internal_entry ().get_text ();
-                if (entry.get_internal_entry ().get_text () != output) {
+                var input = entry.get_internal_entry ().get_text ();
+                var output = eval.evaluate (input, decimal_places);
+                result.label = input;
+                if (input != output) {
+                    calc_history.add_entry (input, output);
                     entry.get_internal_entry ().set_text (output);
                     position = output.length;
                     remove_error ();
@@ -405,7 +442,9 @@ public class Abacus.MainWindow : He.ApplicationWindow {
         }
 
         if (replacement_text != "" && replacement_text != new_text) {
-            entry.get_internal_entry ().do_insert_text (replacement_text, entry.get_internal_entry ().cursor_position + replacement_text.char_count (), ref position);
+            var cursor_position = entry.get_internal_entry ().cursor_position;
+            entry.get_internal_entry ().do_insert_text (replacement_text, -1, ref cursor_position);
+            position = cursor_position;
             Signal.stop_emission_by_name ((void*) entry.get_internal_entry ().get_delegate (), "insert-text");
         }
     }
@@ -435,5 +474,69 @@ public class Abacus.MainWindow : He.ApplicationWindow {
             Signal.stop_emission_by_name ((void*) to_entry.get_internal_entry ().get_delegate (), "insert-text");
             Signal.stop_emission_by_name ((void*) from_entry.get_internal_entry ().get_delegate (), "insert-text");
         }
+    }
+
+    private void update_history_list () {
+        // Clear existing items
+        while (history_list.get_first_child () != null) {
+            history_list.remove (history_list.get_first_child ());
+        }
+
+        var entries = calc_history.get_entries ();
+        // Display in reverse order (newest first)
+        for (int i = entries.size - 1; i >= 0; i--) {
+            var entry_item = entries[i];
+            var row = create_history_row (entry_item, i);
+            history_list.append (row);
+        }
+    }
+
+    private Gtk.Box create_history_row (HistoryEntry entry_item, int index) {
+        var row_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+
+        // Expression and result labels
+        var expr_label = new Gtk.Label (entry_item.expression);
+        expr_label.xalign = 0;
+        expr_label.add_css_class ("cb-title");
+        expr_label.add_css_class ("numeric");
+
+        var result_label = new Gtk.Label ("= " + entry_item.result);
+        result_label.xalign = 0;
+        result_label.add_css_class ("view-subtitle");
+        result_label.add_css_class ("numeric");
+
+        // Button box
+        var button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
+        button_box.halign = Gtk.Align.END;
+
+        var use_button = new He.Button ("", "") {
+            label = _("Use"),
+            is_fill = true,
+            valign = Gtk.Align.CENTER
+        };
+        use_button.clicked.connect (() => {
+            history.active = false;
+            entry.get_internal_entry ().set_text (entry_item.result);
+            entry.get_internal_entry ().grab_focus ();
+        });
+
+        var delete_button = new He.Button ("", "") {
+            icon = "user-trash-symbolic",
+            is_textual = true,
+            valign = Gtk.Align.CENTER
+        };
+        delete_button.clicked.connect (() => {
+            calc_history.remove_entry (index);
+        });
+
+        button_box.append (delete_button);
+        button_box.append (use_button);
+
+        row_box.append (expr_label);
+        row_box.append (result_label);
+        row_box.append (button_box);
+        row_box.add_css_class ("mini-content-block");
+
+        return row_box;
     }
 }

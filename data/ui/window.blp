@@ -20,21 +20,45 @@ template $AbacusMainWindow : He.ApplicationWindow {
       He.AppBar {
         show-right-title-buttons: true;
         show-back: false;
-        viewtitle-widget: DropDown units_dropdown {
-          visible: false;
-          halign: start;
-          model: 
-          StringList {
-            strings [_("Temperature"), _("Mass"), _("Length"), _("Volume"), _("Time")]
-          };
+        viewtitle-widget: Stack titlebar_stack {
+          StackPage {
+            name: "default";
+            child: Box {};
+          }
 
-          styles [ "chooser" ]
+          StackPage {
+            name: "converter";
+            child: DropDown units_dropdown {
+              halign: start;
+              model:
+              StringList {
+                strings [_("Temperature"), _("Mass"), _("Length"), _("Volume"), _("Time")]
+              };
+
+              styles [ "chooser" ]
+            };
+          }
+
+          StackPage {
+            name: "history";
+            child: Label {
+              label: _("History");
+              xalign: 0;
+              styles [ "view-title" ]
+            };
+          }
         };
 
         [titlebar-menu]
         MenuButton menu {
           icon-name: "open-menu";
           menu-model: main_menu;
+        }
+
+        [titlebar-toggle]
+        ToggleButton history {
+          icon-name: "document-open-recent-symbolic";
+          tooltip-text: _("History");
         }
 
         [titlebar-toggle]
@@ -320,7 +344,7 @@ template $AbacusMainWindow : He.ApplicationWindow {
           name: "converter";
           title: "Converter";
           icon-name: "view-list-symbolic";
-          child: 
+          child:
           Box {
             orientation: vertical;
 
@@ -662,6 +686,33 @@ template $AbacusMainWindow : He.ApplicationWindow {
                     row: 3;
                   }
                 }
+              }
+            }
+          };
+        }
+
+        StackPage {
+          name: "history";
+          title: "History";
+          icon-name: "view-list-symbolic";
+          child:
+          Box {
+            orientation: vertical;
+
+            ScrolledWindow {
+              vexpand: true;
+              hexpand: true;
+              hscrollbar-policy: never;
+              margin-top: 12;
+              margin-bottom: 12;
+              margin-start: 18;
+              margin-end: 18;
+
+              ListBox history_list {
+                selection-mode: none;
+                styles [
+                  "content-list"
+                ]
               }
             }
           };
